@@ -1,0 +1,463 @@
+---Import the file students.txt which is a csv file into a collections called students
+
+mongoimport -d local -c students --type csv --file C:\sj\mongo-HW\students.txt --headerline  --port 25514
+
+C:\>mongoimport -d local -c students --type csv --file C:\sj\mongo-HW\students.txt --headerline  --port 25514
+2017-04-25T21:46:31.655-0600    connected to: localhost:25514
+2017-04-25T21:46:32.107-0600    imported 26 documents
+
+--A. Using JavaScript (and not aggregation framework), find the answer to the following six questions
+--1.	How many students are in the collection in 2 different ways?
+--first way
+		var cnt=0;
+		db.students.find().forEach( function(myDoc) {cnt = cnt +1 });
+		print("Total number of students: "+cnt)
+
+
+--OUTPUT:
+Total number of students: 26
+
+--second way
+db.students.find().count()
+
+--OUTPUT:
+26
+
+--2.	Show the name and the scores for all students who have the same score for all their three tests
+		
+		db.students.find().forEach(function(stud)
+		{
+			if(stud.Test1==stud.Test2 && stud.Test2==stud.Test3)
+				{
+					print(stud.Student)
+				}
+		})
+		
+
+--OUTPUT:
+Sammy
+Art
+
+--3.	Print the number of students who have the same score for all their three tests
+		var totStud=0;
+		db.students.find().forEach(function(stud)
+		{
+			if(stud.Test1==stud.Test2 && stud.Test2==stud.Test3)
+				{
+					totStud++;
+				}
+		})
+		print("Total number of students with same score for all three tests: "+totStud);
+
+		
+
+
+--OUTPUT:
+Total number of students with same score for all three tests: 2
+
+
+--4.	Find the name and the scores for those student(s) who have the highest overall average
+		var arr=[];
+		var largest=0;
+		var name;
+		var score;
+		db.students.find().forEach(function(stud)
+		{
+			var totMarks = stud.Test1 + stud.Test2 + stud.Test3;
+			var avg = totMarks/3;
+			
+			if(largest<=avg)
+			{
+				
+				largest=avg;
+				score = stud.Test1+" "+stud.Test2+" "+stud.Test3;
+				name=stud.Student;
+				arr.push({name,score,largest});
+			}
+			
+		});
+	for(i in arr){
+			if(arr[i].largest==largest)
+				{
+					print("Name: "+arr[i].name + " Test Scores: "+arr[i].score);
+					
+				}
+			}	
+		
+OUTPUT:
+Name: Farah Test Scores: 86 99 99
+		
+--5.	Print the name of students whose lowest score is less than the average score for the entire class.
+								var lowest=0;
+                                var arr=[];
+                                var total=[];
+                                var avg=0;
+                                var name;
+                                var i=0;
+                                var sum1=0;
+                                var avgPerStu=0;
+                                db.students.find().forEach(function(stud){
+                                                lowest=Math.min(stud.Test1,stud.Test2,stud.Test3);
+                                                name=stud.Student;
+                                                arr.push({name,lowest});
+                                                total.push(stud.Test1+stud.Test2+stud.Test3);
+                                });
+                                total.forEach( function(s) { 
+                                                sum1+=s;
+                                                
+                                } )
+                                avgPerStu=sum1/3;
+                                print(avgPerStu);
+                                avg = avgPerStu/db.students.find().count();
+                                print(avg);
+                                arr.forEach( function(a) { 
+                                                if(a.lowest<avg)
+                                                {
+                                                                print(a.name)
+                                                }
+                                                
+                                } )
+
+
+--OUTPUT
+Saeed
+Sam
+Saman
+Shah
+Joe
+Joseph
+Jurdan
+Josh
+April
+Lynn
+LeeAnn
+Mo
+Renee
+Kurt
+Tammy
+Roger
+Ed
+Susi
+Poneh
+Farah
+Monir
+		
+--6.	Print the name of student and the effective grade for the student calculated as 
+--a)	the highest score multiplied by 50% plus 
+
+--b)	the middle score multiplied by 30%
+--c)	the lowest score multiplies by 20%
+--d)	For example if John has the scores 40, 75, and 75 and his score his effective score for the class is
+--75 * .5 + 40 * .2 + 75 * .3 = 68
+		
+		
+		
+		db.students.find().forEach(function(stud){
+			var grade=0;
+			var max;
+			var min;
+			var middle;
+			max=Math.max(stud.Test1,stud.Test2,stud.Test3);
+			min=Math.min(stud.Test1,stud.Test2,stud.Test3);
+		if( stud.Test2>stud.Test1 && stud.Test1>stud.Test3 || stud.Test3>stud.Test1 && stud.Test1>stud.Test2 )
+		{
+			middle=stud.Test1;
+		}
+ 
+        
+		if( stud.Test1>stud.Test2 && stud.Test2>stud.Test3 ||stud.Test3>stud.Test2 && stud.Test2>stud.Test1)
+		{
+			middle=stud.Test2;
+		}
+ 
+        
+		if( stud.Test1>stud.Test3 && stud.Test3>stud.Test2 || stud.Test2>stud.Test3 && stud.Test3>stud.Test1 )
+		{
+			middle=stud.Test3;
+		}
+		if((stud.Test1==stud.Test2 || stud.Test1==stud.Test3) && (stud.Test1==min ||stud.Test1==max))
+		{
+			middle=stud.Test1;
+		}
+		if((stud.Test2==stud.Test1|| stud.Test2==stud.Test3) && (stud.Test2==min ||stud.Test2==max))
+		{
+			middle=stud.Test2;
+		}
+		if((stud.Test3==stud.Test2 || stud.Test3==stud.Test1) && (stud.Test3==min ||stud.Test3==max))
+		{
+			middle=stud.Test3;
+		}
+			grade=max*0.5+middle*0.3+min*0.2;
+			print("Name:"+ stud.Student +" grade:"+grade);
+		});
+		--OUTPUT
+		Name:Saeed grade:83.1
+		Name:Sam grade:75.6
+		Name:Sammy grade:77
+		Name:Saman grade:67.6
+		Name:Shah grade:58.099999999999994
+		Name:Joe grade:62.3
+		Name:Joseph grade:53.400000000000006
+		Name:Jurdan grade:54.8
+		Name:Josh grade:71.3
+		Name:April grade:69.69999999999999
+		Name:Art grade:66
+		Name:Lynn grade:62.300000000000004
+		Name:LeeAnn grade:48.7
+		Name:Mo grade:42
+		Name:Farah grade:96.4
+		Name:Renee grade:77.6
+		Name:Kurt grade:62.2
+		Name:Tammy grade:77.8
+		Name:Roger grade:75.2
+		Name:Ed grade:76.3
+		Name:Elaine grade:88
+		Name:Susi grade:66.1
+		Name:Poneh grade:79.39999999999999
+		Name:Golpar grade:85
+		Name:Farah grade:63.1
+		Name:Monir grade:79.7
+		
+		
+--B. Repeat above six steps using Aggregation Framework. 
+
+
+--1.	How many students are in the collection in 2 different ways?
+		--FIRST WAY
+		 db.students.aggregate ([
+		{$group: {_id:null, count:{$sum:1}}}
+		])
+		
+		--OUTPUT
+		{ "_id" : null, "count" : 26 }
+		
+		--SECOND WAY
+		 db.students.aggregate([
+				{$count:"Student"}
+				])
+				
+		
+		--OUTPUT
+		{ "Student" : 26 }
+		
+--2.	Show the name and the scores for all students who have the same score for all their three tests
+		 db.students.aggregate( [
+						 { $project:
+							{
+							 _id:0,
+							 Student:1,
+							 Test1:1,
+							 Test2:1,
+							 Test3:1,
+							 cmpval:{ $and: [ { $eq: ["$Test1", "$Test2"] }, {$eq:["$Test2", "$Test3"]}] }
+							}
+						},
+						 {$match:{"cmpval":true}},
+						 ] ).pretty();
+
+--OUTPUT:						 
+{
+        "Student" : "Sammy",
+        "Test1" : 77,
+        "Test2" : 77,
+        "Test3" : 77,
+        "cmpval" : true
+}
+{
+        "Student" : "Art",
+        "Test1" : 66,
+        "Test2" : 66,
+        "Test3" : 66,
+        "cmpval" : true
+}
+--3.	Print the number of students who have the same score for all their three tests
+		 db.students.aggregate( [
+						 { $project:
+							{
+							 cmpval:{ $and: [ { $eq: ["$Test1", "$Test2"] }, {$eq:["$Test2", "$Test3"]}] }
+							}
+						},
+						 {$match:{"cmpval":true}},{$count:"Students with same score for all tests: "}
+						 ] ).pretty();
+						 
+--OUTPUT
+{ "Students with same score for all tests: " : 2 }
+
+--4.	Find the name and the scores for those student(s) who have the highest overall average
+
+
+	db.students.aggregate([
+							{$project:{_id:0,
+							Student:1,
+							Test1:1,
+							Test2:2,
+							Test3:3,
+							 average:{$avg:["$Test1","$Test2","$Test3"]}
+							 }},
+							  	 {$group:{
+									   maxTotalAmount: { $max: "$average"  },
+									   _id:"$average",
+									   m:{$push:{Student:"$Student",Test1:"$Test1",Test2:"$Test2",Test3:"$Test3"}}
+									  }
+							 },
+							 {$sort:{_id:-1}},
+							 {$limit:1},
+							 {$project:{_id:0,
+									   m:1}}
+							 ]).pretty()
+
+
+OUTPUT:
+{
+        "m" : [
+                {
+                        "Student" : "Farah",
+                        "Test1" : 86,
+                        "Test2" : 99,
+                        "Test3" : 99
+                }
+        ]
+}							 
+	
+--5.	Print the name of students whose lowest score is less than the average score for the entire class.
+	db.students.aggregate([
+						
+						{$project:{_id:1,
+								   Student:1,
+								   minTest:{$min:["$Test1","$Test2","$Test3"]},
+								   totSum:{$sum:["$Test1","$Test2","$Test3"]}
+								   }},
+						{$group:{
+								_id:{T1:"$Test1",T2:"$Test2",T3:"$Test3"},
+								tot:{$avg:{$divide:[{$sum:"$totSum"},3]}},
+								minArr:{$push:{Student:"$Student",tesmin:"$minTest"}}
+						}},
+						{$unwind:"$minArr"},
+						{$project:{_id:0,"minArr.Student":1,cmpre:{$cmp:["$minArr.tesmin","$tot"]}}},
+						 {$match:{"cmpre":-1}},
+						 {$project:{"minArr.Student":1}}
+								   ])
+
+OUTPUT:
+{ "minArr" : { "Student" : "Saeed" } }
+{ "minArr" : { "Student" : "Sam" } }
+{ "minArr" : { "Student" : "Saman" } }
+{ "minArr" : { "Student" : "Shah" } }
+{ "minArr" : { "Student" : "Joe" } }
+{ "minArr" : { "Student" : "Joseph" } }
+{ "minArr" : { "Student" : "Jurdan" } }
+{ "minArr" : { "Student" : "Josh" } }
+{ "minArr" : { "Student" : "April" } }
+{ "minArr" : { "Student" : "Lynn" } }
+{ "minArr" : { "Student" : "LeeAnn" } }
+{ "minArr" : { "Student" : "Mo" } }
+{ "minArr" : { "Student" : "Renee" } }
+{ "minArr" : { "Student" : "Kurt" } }
+{ "minArr" : { "Student" : "Tammy" } }
+{ "minArr" : { "Student" : "Roger" } }
+{ "minArr" : { "Student" : "Ed" } }
+{ "minArr" : { "Student" : "Susi" } }
+{ "minArr" : { "Student" : "Poneh" } }
+{ "minArr" : { "Student" : "Farah" } }
+Type "it" for more
+> it
+{ "minArr" : { "Student" : "Monir" } }
+>
+
+--6.	Print the name of student and the effective grade for the student calculated as 
+--a)	the highest score multiplied by 50% plus 
+--b)	the middle score multiplied by 30%
+--c)	the lowest score multiplies by 20%
+--d)	For example if John has the scores 40, 75, and 75 and his score his effective score for the class is
+--75 * .5 + 40 * .2 + 75 * .3 = 68
+db.students.aggregate([
+						{$project:{_id:1,
+								   Student:1,
+								   Test1:1,
+								   Test2:1,
+								   Test3:1,
+								   maxScore:{$max:["$Test1","$Test2","$Test3"]},
+								   minScore:{$min:["$Test1","$Test2","$Test3"]}
+						}},
+						{$project:{_id:1,
+									Student:1,
+									maxScore:1,
+									minScore:1,
+									 middle:{$switch:
+										{
+										  branches: [
+											{
+											  case: {$or:[{$and:[ { $gt: ["$Test2", "$Test1"] }, {$gt:["$Test1", "$Test3"]}]},
+												 {$and:[ { $gt: ["$Test3", "$Test1"] }, {$gt:["$Test1", "$Test2"]}]}]  },
+											  then:"$Test1"
+											},
+											{
+											  case: { $or:[{$and:[ { $gt: ["$Test1", "$Test2"] }, {$gt:["$Test2", "$Test3"]}]},
+												 {$and:[ { $gt: ["$Test3", "$Test2"] }, {$gt:["$Test2", "$Test1"]}]}] },
+											  then: "$Test2"
+											},
+											{
+											  case: {$or:[{$and:[ { $gt: ["$Test1", "$Test3"] }, {$gt:["$Test3", "$Test2"]}]},
+												 {$and:[ { $gt: ["$Test2", "$Test3"] }, {$gt:["$Test3", "$Test1"]}]}]},
+											  then: "$Test3"
+											},
+											{
+												case:{$and:[{$or:[ { $eq: ["$Test1", "$Test2"] }, {$eq:["$Test1", "$Test3"]}]},
+												{$or:[ { $eq: ["$Test1", "$minScore"] }, {$eq:["$Test1", "$maxScore"]}]}]},
+												then:"$Test1"
+											},
+											{
+												case:{$and:[{$or:[ { $eq: ["$Test2", "$Test1"] }, {$eq:["$Test2", "$Test3"]}]},
+												{$or:[ { $eq: ["$Test2", "$minScore"] }, {$eq:["$Test2", "$maxScore"]}]}]},
+												then:"$Test2"
+											},
+											{
+												case:{$and:[{$or:[ { $eq: ["$Test3", "$Test2"] }, {$eq:["$Test3", "$Test1"]}]},
+												{$or:[ { $eq: ["$Test3", "$minScore"] }, {$eq:["$Test3", "$maxScore"]}]}]},
+												then:"$Test3"
+											}
+										  ],
+										  default: "NA"
+										}}
+						}
+						},
+						{	
+							$project:{
+								_id:0,
+								Student:1,
+								grade:{$sum:[{$multiply:["$maxScore",0.50]},{$multiply:["$middle",0.30]},{$multiply:["$minScore",0.20]}]}
+							}
+						}			
+						])
+
+
+
+OUTPUT:
+{ "Student" : "Saeed", "grade" : 83.1 }
+{ "Student" : "Sam", "grade" : 75.6 }
+{ "Student" : "Sammy", "grade" : 77 }
+{ "Student" : "Saman", "grade" : 67.6 }
+{ "Student" : "Shah", "grade" : 58.1 }
+{ "Student" : "Joe", "grade" : 62.3 }
+{ "Student" : "Joseph", "grade" : 53.4 }
+{ "Student" : "Jurdan", "grade" : 54.8 }
+{ "Student" : "Josh", "grade" : 71.3 }
+{ "Student" : "April", "grade" : 69.7 }
+{ "Student" : "Art", "grade" : 66 }
+{ "Student" : "Lynn", "grade" : 62.3 }
+{ "Student" : "LeeAnn", "grade" : 48.7 }
+{ "Student" : "Mo", "grade" : 42 }
+{ "Student" : "Farah", "grade" : 96.4 }
+{ "Student" : "Renee", "grade" : 77.6 }
+{ "Student" : "Kurt", "grade" : 62.2 }
+{ "Student" : "Tammy", "grade" : 77.8 }
+{ "Student" : "Roger", "grade" : 75.2 }
+{ "Student" : "Ed", "grade" : 76.3 }
+Type "it" for more
+> it
+{ "Student" : "Elaine", "grade" : 88 }
+{ "Student" : "Susi", "grade" : 66.1 }
+{ "Student" : "Poneh", "grade" : 79.4 }
+{ "Student" : "Golpar", "grade" : 85 }
+{ "Student" : "Farah", "grade" : 63.1 }
+{ "Student" : "Monir", "grade" : 79.7 }

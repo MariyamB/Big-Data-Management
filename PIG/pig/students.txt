@@ -1,0 +1,8 @@
+1	Sam	25	3.5
+2	Joe	23	4.0
+3	Stan	21	3.7
+4	Susan	25	3.1
+5	Saeed	60	4.0
+6	John	19	3.1
+7	June	 	3.3
+8	Sam	30	3.0

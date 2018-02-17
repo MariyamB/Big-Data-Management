@@ -1,0 +1,185 @@
+ A: 
+1. Load this file into Neo4j as a set of nodes labeled "Line". You should have as many nodes as the number of lines in this file (there are 24 lines which will give you 24 nodes).
+
+load csv from "file:/g:/neodbs/temps.txt" as line with distinct line create(l:Line{a:line})
+
+Added 25 labels, created 25 nodes, set 25 properties, statement completed in 197 ms.
+
+2. Use the Line nodes you just created to print the year and the temperature reading for that year sorted by year
+
+match(n:Line) unwind(n.a) as s 
+with substring(s,15,4) as Year, 
+case when substring(s,87,1)="+" and substring(s,89,1)>"0" then substring(s,89,3)
+when substring(s,87,1)="+" and substring(s,89,1)="0" then substring(s,90,2)
+when substring(s,87,1)="-" and substring(s,89,1)>"0" then  "-"+ substring(s,89,3)
+else "-"+ substring(s,90,2)
+end as Temp
+return Year,Temp
+order by Year
+
+--OUTPUT
+
+Year	Temp
+1941	44
+1942	90
+1942	12
+1948	100
+1948	-21
+1948	-77
+1949	111
+1949	78
+1949	99
+1949	88
+1950	00
+1950	33
+1950	-11
+1950	12
+1950	44
+1950	-77
+1951	27
+1951	100
+1951	14
+1951	-14
+1951	90
+1952	-21
+1952	90
+1952	-57
+1952	89
+
+
+
+--3.  Use the Line nodes you created in Step 1 to create a set of nodes labeled “Year” for each unique value of year, a set of nodes
+labeled “Temp” for each unique temperature reading, and relate each year to its temperature readings using the relationship 
+HAS_TEMP and print the year, the temp reading, and relationship type in descending sorted order of the year.
+
+match(n:Line) unwind(n.a) as s with 
+case when substring(s,87,1)="+" and substring(s,89,1)>"0" then substring(s,89,3)
+when substring(s,87,1)="+" and substring(s,89,1)="0" then substring(s,90,2)
+when substring(s,87,1)="-" and substring(s,89,1)>"0" then  "-"+ substring(s,89,3)
+else "-"+ substring(s,90,2)
+end as Temp,
+substring(s,15,4) as Year 
+merge(y:Year{b:Year})
+merge(a:Temp{t:Temp})
+create(y)-[:HAS_TEMP]->(a)
+	
+Added 25 labels, created 25 nodes, set 25 properties, created 25 relationships, statement completed in 271 ms.
+
+
+
+--OUTPUT
+	
+match(n:Year)-[:HAS_TEMP]->(m:Temp) return n.b as Year,m.t as Temp
+
+
+Year	Temp
+1950	-77
+1950	44
+1950	12
+1950	-11
+1950	33
+1950	00
+1949	88
+1949	99
+1949	78
+1949	111
+1951	90
+1951	-14
+1951	14
+1951	100
+1951	27
+1952	89
+1952	-57
+1952	90
+1952	-21
+1948	-77
+1948	-21
+1948	100
+1942	12
+1942	90
+1941	44
+	
+	
+4. Remove the nodes of label Line.
+
+Match (l:Line)
+Delete l;
+
+Deleted 25 nodes, statement completed in 68 ms.
+
+
+5. Print temp readings for the year 1950.
+	
+match(n:Year)-[:HAS_TEMP]->(m:Temp) where n.b="1950" return n.b as Year,m.t as Temp
+	
+OUTPUT:
+	
+Year	Temp
+1950	-77
+1950	44
+1950	12
+1950	-11
+1950	33
+1950	00
+
+6. Print temp readings for the year 1950 and the years that share these readings in sorted order of the temps.
+
+	
+match (y:Year{b:"1950"}) 
+WITH y 
+match (y)-[:HAS_TEMP]->(t)  
+with y,t 
+match (t)<-[:HAS_TEMP]-(u) 
+return u.b as Year,t.t as Temp
+order by Temp
+
+OUTPUT:
+	
+Year	Temp
+1950	-11
+1948	-77
+1950	-77
+1950	00
+1942	12
+1950	12
+1950	33
+1941	44
+1950	44
+	
+
+7. Print the count of temperature readings for each year in the descending order of the counts.
+	
+match(y:Year)-[:HAS_TEMP]->(t:Temp) return count(t.t) as Count,(y.b) as Year order by Count desc
+	
+OUTPUT:
+
+Count	Year
+6	1950
+5	1951
+4	1952
+4	1949
+3	1948
+2	1942
+1	1941
+			
+8. Print the year(s) that has the highest number of recordings
+	
+match(y:Year)-[:HAS_TEMP]->(t:Temp) 
+with y as Year, collect(t) as Temp 
+with size(Temp) as Count, Year as Y
+with collect(Y) as yr,Count,max(Count) as max
+with yr,max order by max desc limit 1
+unwind yr as Year
+return Year.b as Year
+	
+OUTPUT:
+Year
+	
+1950
+	
+	
+	
+	
+	
+	
+	

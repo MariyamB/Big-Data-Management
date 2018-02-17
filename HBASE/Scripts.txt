@@ -1,0 +1,152 @@
+create 'users', 'ename','photo'
+put 'users', 'Skrahimi', 'ename:fname', 'Saeed'
+put 'users', 'Skrahimi', 'ename:lname', 'Rahimi'
+put 'users', 'Bsmisra', 'ename:mi', 'S'
+put 'users', 'Skrahimi', 'ename:mi', 'K'
+put 'users', 'Bsrubin', 'ename:fname', 'Brad'
+put 'users', 'Bsrubin', 'ename:lname', 'Rubin'
+put 'users', 'Bsmisra', 'ename:lname', 'Misra'
+put 'users', 'Bsmisra', 'ename:mi', 'S'
+put 'users', 'Skrahimi', 'ename:fname', 'SAEED'
+
+
+get 'users', 'Skrahimi'
+COLUMN                         CELL
+ ename:fname                   timestamp=1491439118571, value=SAEED
+ ename:lname                   timestamp=1491439116770, value=Rahimi
+ ename:mi                      timestamp=1491439116838, value=K
+
+ get 'users', 'Skrahimi', 'ename:fname'
+COLUMN                         CELL
+ ename:fname                   timestamp=1491439118571, value=SAEED
+1 row(s) in 0.0150 seconds
+
+
+ put 'users', 'Skrahimi', 'ename:fname', 'sam'
+
+ get 'users', 'Skrahimi', {COLUMN => 'ename:fname', VERSIONS => 3}
+COLUMN                         CELL
+ ename:fname                   timestamp=1491440353903, value=sam
+ ename:fname                   timestamp=1491439118571, value=SAEED
+ ename:fname                   timestamp=1491439116723, value=Saeed
+3 row(s) in 0.0080 seconds
+
+hbase(main):027:0* scan 'users'
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+ Skrahimi                      column=ename:fname, timestamp=1491440353903, value=sam
+ Skrahimi                      column=ename:lname, timestamp=1491439116770, value=Rahimi
+ Skrahimi                      column=ename:mi, timestamp=1491439116838, value=K
+3 row(s) in 0.0200 seconds
+
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+ Skrahimi                      column=ename:fname, timestamp=1491440353903, value=sam
+ Skrahimi                      column=ename:lname, timestamp=1491439116770, value=Rahimi
+ Skrahimi                      column=ename:mi, timestamp=1491439116838, value=K
+3 row(s) in 0.0130 seconds
+
+ scan 'users',{COLUMNS => 'ename:'}
+
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+ Skrahimi                      column=ename:fname, timestamp=1491440353903, value=sam
+ Skrahimi                      column=ename:lname, timestamp=1491439116770, value=Rahimi
+ Skrahimi                      column=ename:mi, timestamp=1491439116838, value=K
+3 row(s) in 0.0350 seconds
+
+scan 'users',{COLUMNS => 'ename:lname'}
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+ Skrahimi                      column=ename:lname, timestamp=1491439116770, value=Rahimi
+3 row(s) in 0.0130 seconds
+
+scan 'users',{STARTROW  => 'Bsmisra',STOPROW => 'Skrahimi'}
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+2 row(s) in 0.0130 seconds
+
+scan 'users',{STARTROW  => 'Skrahimi',STOPROW => 'Bsmisra'}
+ROW                            COLUMN+CELL
+0 row(s) in 0.0040 seconds
+
+scan 'users',{STARTROW  => 'Bsmisra',LIMIT => 2}
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+2 row(s) in 0.0100 seconds
+
+ scan 'users',{STARTROW  => 'Bsmisra',STOPROW => 'Skrahimi',LIMIT => 2}
+ROW                            COLUMN+CELL
+ Bsmisra                       column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                       column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsmisra                       column=ename:mi, timestamp=1491439116945, value=S
+ Bsrubin                       column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                       column=ename:lname, timestamp=1491439116876, value=Rubin
+2 row(s) in 0.0230 seconds
+
+ count 'users'
+3 row(s) in 0.0130 seconds
+
+count 'users',2
+Current count: 2, row: Bsrubin
+3 row(s) in 0.0130 seconds
+
+ count 'users',4
+3 row(s) in 0.0060 seconds
+
+ delete 'users', 'Bsmisra', 'ename:mi'
+
+scan 'users'
+ROW                          COLUMN+CELL
+ Bsmisra                     column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                     column=ename:lname, timestamp=1491439116900, value=Misra
+ Bsrubin                     column=ename:fname, timestamp=1491439116859, value=Brad
+ Bsrubin                     column=ename:lname, timestamp=1491439116876, value=Rubin
+ Skrahimi                    column=ename:fname, timestamp=1491440353903, value=sam
+ Skrahimi                    column=ename:lname, timestamp=1491439116770, value=Rahimi
+ Skrahimi                    column=ename:mi, timestamp=1491439116838, value=K
+3 row(s) in 0.0280 seconds
+
+deleteall 'users', 'Bsrubin'
+
+ scan 'users'
+ROW                          COLUMN+CELL
+ Bsmisra                     column=ename:fname, timestamp=1491439321584, value=Bhabani
+ Bsmisra                     column=ename:lname, timestamp=1491439116900, value=Misra
+ Skrahimi                    column=ename:fname, timestamp=1491440353903, value=sam
+ Skrahimi                    column=ename:lname, timestamp=1491439116770, value=Rahimi
+ Skrahimi                    column=ename:mi, timestamp=1491439116838, value=K
+
+
+hbase org.apache.hadoop.hbase.io.hfile.HFile -v -p -m -f \
+hdfs://0.0.0.0:8020/hbase/tab1/72c020246c63fec2b26ddf4e9d9f55cf/cf1/19304fded8dc48f3a4bbd9692d405d54
+
+K: row/cf1:col1/1491442360068/Put/vlen=5/ts=0 V: Maria
+Scanned kv count -> 1
+
+major_compact 'tab1'
+
+ls hbase/tab1/72c020246c63fec2b26ddf4e9d9f55cf/cf1/19304fded8dc48f3a4bbd9692d405d54
+2017-04-05 21:39:33,939 ERROR org.apache.pig.tools.grunt.Grunt: ERROR 2997: Encountered IOException. File or directory hbase/tab1/72c020246c63fec2b26ddf4e9d9f55cf/cf1/19304fded8dc48f3a4bbd9692d405d54 does not exist.
+Details at logfile: /home/training/pig_1491442711966.log

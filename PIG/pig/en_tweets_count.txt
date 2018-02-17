@@ -1,0 +1,67 @@
+tweets = LOAD 'tweets_t.txt' USING PigStorage('\t') AS (user:chararray, language:chararray,location:chararray,DateTime:chararray,f5:chararray,f6:chararray);
+en_tweets = filter tweets by language == 'en';  
+grp_tweets = group tweets by language;
+cnt = foreach grp_tweets generate group, COUNT(tweets);
+(ar,122)
+(ca,343)
+(cs,14)
+(da,44)
+(de,860)
+(el,9)
+(en,53680)
+(es,33801)
+(eu,17)
+(fi,97)
+(fr,2341)
+(gl,7)
+(he,2)
+(hu,20)
+(id,5705)
+(it,1408)
+(ja,376)
+(ko,9)
+(nl,1183)
+(no,22)
+(pl,116)
+(pt,1684)
+(ru,398)
+(sv,233)
+(th,106)
+(tr,400)
+(uk,5)
+(msa,2)
+(lolc,1)
+(xx-lc,1)
+(zh-cn,3)
+(zh-tw,4)
+(Wed Apr 10 13:44:05 CDT 2013,0)
+(Wed Apr 10 13:45:54 CDT 2013,0)
+(Wed Apr 10 13:46:59 CDT 2013,1)
+(Wed Apr 10 13:54:33 CDT 2013,0)
+(Wed Apr 10 14:11:38 CDT 2013,0)
+(Wed Apr 10 14:12:25 CDT 2013,0)
+(Wed Apr 10 14:16:07 CDT 2013,0)
+(Wed Apr 10 14:16:23 CDT 2013,0)
+(Wed Apr 10 14:34:46 CDT 2013,0)
+(Wed Apr 10 14:37:23 CDT 2013,0)
+(Wed Apr 10 14:40:48 CDT 2013,0)
+(Wed Apr 10 14:42:56 CDT 2013,0)
+(Wed Apr 10 14:49:55 CDT 2013,0)
+
+SPLIT tweets INTO bad_tweets IF language MATCHES '.*Wed.*', en_tweets IF language == 'en';
+
+grp_tweets = group en_tweets by language;
+cnt = foreach grp_tweets generate group, COUNT(en_tweets);
+dump cnt;
+
+2013-11-12 18:45:33,648 [main] INFO  org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceLauncher - Success!
+2013-11-12 18:45:33,651 [main] INFO  org.apache.hadoop.mapreduce.lib.input.FileInputFormat - Total input paths to process : 1
+2013-11-12 18:45:33,651 [main] INFO  org.apache.pig.backend.hadoop.executionengine.util.MapRedUtil - Total input paths to process : 1
+(en,53680)
+
+clean_tweets = FILTER tweets BY NOT(language MATCHES '^Wed.*');
+grp_tweets = group clean_tweets by language;
+cnt = foreach grp_tweets generate group, COUNT(clean_tweets);
+dump cnt;
+
+
